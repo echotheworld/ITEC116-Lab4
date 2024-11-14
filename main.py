@@ -48,7 +48,7 @@ task_db = [
 ]
 
 # Version 1 router
-@app.get("/v1/tasks", status_code=200)
+@app.get("/apiv1/tasks", status_code=200)
 def read_task_v1(task_id: Optional[int] = None):
     # If task_id is provided, find specific task
     if task_id is not None:
@@ -64,7 +64,7 @@ def read_task_v1(task_id: Optional[int] = None):
         raise HTTPException(status_code=204, detail={"error": "No tasks found"})
     return {"status": "ok", "tasks": task_db}
 
-@app.post("/v1/tasks", status_code=201)
+@app.post("/apiv1/tasks", status_code=201)
 def create_task_v1(task: TaskCreate):
     # Generate a new task ID
     if not task_db:
@@ -76,7 +76,7 @@ def create_task_v1(task: TaskCreate):
     task_db.append(new_task.dict())
     return {"status": "ok", "task": new_task}  # Return the newly created task
 
-@app.patch("/v1/tasks/{task_id}", status_code=204)
+@app.patch("/apiv1/tasks/{task_id}", status_code=204)
 def update_task_v1(task_id: int, task_update: TaskUpdate):
     # Validate that the task_id is positive
     if task_id <= 0:
@@ -94,7 +94,7 @@ def update_task_v1(task_id: int, task_update: TaskUpdate):
     task_db[task_index] = updated_task
     return None  # 204 No Content
 
-@app.delete("/v1/tasks/{task_id}", status_code=204)
+@app.delete("/apiv1/tasks/{task_id}", status_code=204)
 def delete_task_v1(task_id: int):
     # Validate that the task_id is positive
     if task_id <= 0:
@@ -108,18 +108,18 @@ def delete_task_v1(task_id: int):
     return None  # 204 No Content
 
 # Version 2 endpoints with authentication
-@app.get("/v2/tasks", status_code=200)
+@app.get("/apiv2/tasks", status_code=200)
 def read_task_v2(task_id: Optional[int] = None, api_key: APIKey = Depends(get_api_key)):
     return read_task_v1(task_id)
 
-@app.post("/v2/tasks", status_code=201)
+@app.post("/apiv2/tasks", status_code=201)
 def create_task_v2(task: TaskCreate, api_key: APIKey = Depends(get_api_key)):
     return create_task_v1(task)
 
-@app.patch("/v2/tasks/{task_id}", status_code=204)
+@app.patch("/apiv2/tasks/{task_id}", status_code=204)
 def update_task_v2(task_id: int, task_update: TaskUpdate, api_key: APIKey = Depends(get_api_key)):
     return update_task_v1(task_id, task_update)
 
-@app.delete("/v2/tasks/{task_id}", status_code=204)
+@app.delete("/apiv2/tasks/{task_id}", status_code=204)
 def delete_task_v2(task_id: int, api_key: APIKey = Depends(get_api_key)):
     return delete_task_v1(task_id)
